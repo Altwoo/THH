@@ -1,0 +1,5 @@
+name: 3HH
+version: '1.0'
+main: dev.chwoo.thh.THH
+api-version: '1.21'
+author: HMA_Delta
