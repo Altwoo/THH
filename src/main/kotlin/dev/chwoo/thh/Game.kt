@@ -13,6 +13,7 @@ import org.bukkit.GameMode
 import org.bukkit.GameRules
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
@@ -34,8 +35,6 @@ object Game {
 
     var alertTimes = mutableListOf<Int>()
 
-    const val CENTER_X = 261.0
-    const val CENTER_Z = -97.0
 
     fun start() {
         prePlaying = true
@@ -98,13 +97,12 @@ object Game {
         prePlaying = false
         playing = true
         players.clear()
-        endTime = System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 5
+        endTime = System.currentTimeMillis() + GAME_DURATION
         setPlatform(Material.AIR)
 
         Bukkit.getWorlds().forEach {
             it.setGameRule(GameRules.ADVANCE_TIME, true)
             it.setGameRule(GameRules.ADVANCE_WEATHER, true)
-            it.setGameRule(GameRules.RESPAWN_RADIUS, 1000)
         }
 
         Bukkit.getOnlinePlayers().forEach {
@@ -115,7 +113,7 @@ object Game {
 
     fun init() {
         val mainWorld = Bukkit.getWorlds().first()
-        mainWorld.spawnLocation = Location(mainWorld, CENTER_X, 100.0, CENTER_Z)
+        mainWorld.spawnLocation = Location(mainWorld, CENTER_X, CENTER_Y, CENTER_Z)
         Bukkit.getWorlds().forEach {
             it.setGameRule(GameRules.IMMEDIATE_RESPAWN, true)
             it.setGameRule(GameRules.LOCATOR_BAR, false)
@@ -125,13 +123,11 @@ object Game {
             it.setGameRule(GameRules.ADVANCE_WEATHER, false)
             it.difficulty = Difficulty.HARD
         }
-//        mainWorld.worldBorder.setCenter(centerX, centerZ)
-//        mainWorld.worldBorder.size = 50.0
 
         setPlatform(Material.BARRIER)
 
         Bukkit.getOnlinePlayers().forEach {
-            it.teleport(mainWorld.spawnLocation.apply { y = 100.0 })
+            it.teleport(mainWorld.spawnLocation.apply { y = CENTER_Y })
             it.gameMode = GameMode.ADVENTURE
         }
     }
@@ -217,7 +213,7 @@ object Game {
             for (y in -1..2) {
                 for (z in -4..4) {
                     if (y != -1 && !(abs(x) == 4 || abs(z) == 4)) continue
-                    mainWorld.getBlockAt(CENTER_X.toInt() + x, 100 + y, CENTER_Z.toInt() + z).type = material
+                    mainWorld.getBlockAt(CENTER_X.toInt() + x, CENTER_Y.toInt() + y, CENTER_Z.toInt() + z).type = material
                 }
             }
         }
@@ -242,6 +238,7 @@ object Game {
             giveSpawnEffects(this)
             gameMode = GameMode.SURVIVAL
         }
+        player.discoverRecipe(NamespacedKey(plugin, "totem"))
 
 
         val gamePlayer = GamePlayer(player.name, player.uniqueId, 0)
