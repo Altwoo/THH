@@ -41,56 +41,47 @@ class Events : Listener {
         player.playerListName(player.displayName().color(team?.color()))
         val gamePlayer = Game.getPlayer(player)
         gamePlayer?.name = player.name
-        if (gamePlayer != null) return
-        Game.addPlayer(player)
+        if (gamePlayer != null) {
+            if (gamePlayer.alive) return
+            player.gameMode = GameMode.SURVIVAL
+            Game.giveSpawnEffects(player)
+            player.addPotionEffects(
+                listOf(
+                    PotionEffect(
+                        PotionEffectType.SLOW_FALLING,
+                        20 * 15,
+                        0,
+                        true,
+                        false,
+                        true
+                    ), PotionEffect(
+                        PotionEffectType.DOLPHINS_GRACE,
+                        20 * 60,
+                        0,
+                        true,
+                        false,
+                        true
+                    )
+                )
+            )
+
+            gamePlayer.alive = true
+            if (gamePlayer.killed) player.joinTeam(teamKiller)
+            else player.joinTeam(teamAlive)
+        } else Game.addPlayer(player)
     }
 
     @EventHandler
     fun onRespawn(e: PlayerRespawnEvent) {
         if (!Game.playing) return
-        val player = e.player
-        val gamePlayer = Game.getPlayer(player)
-        if (gamePlayer?.alive != false) return
+        if (e.respawnReason != PlayerRespawnEvent.RespawnReason.DEATH) return
         val world = Bukkit.getWorlds().first()
         val x = Random.nextInt(-500..500)
         val z = Random.nextInt(-500..500)
-        val y = world.getHighestBlockAt(x, z).y + 100
-        Bukkit.broadcast("CALLED".comp())
+        val y = world.getHighestBlockAt(x, z).y + 75
         e.respawnLocation = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
-    @EventHandler
-    fun onFinalRespawn(e: PlayerPostRespawnEvent) {
-        val player = e.player
-        val gamePlayer = Game.getPlayer(player)
-        gamePlayer?.name = player.name
-        if (gamePlayer?.alive != false) return
-        Bukkit.broadcast("22".comp())
-        Game.giveSpawnEffects(player)
-        player.addPotionEffects(
-            listOf(
-                PotionEffect(
-                    PotionEffectType.SLOW_FALLING,
-                    20 * 15,
-                    0,
-                    true,
-                    false,
-                    true
-                ), PotionEffect(
-                    PotionEffectType.DOLPHINS_GRACE,
-                    20 * 60,
-                    0,
-                    true,
-                    false,
-                    true
-                )
-            )
-        )
-
-        gamePlayer.alive = true
-        if (gamePlayer.killed) player.joinTeam(teamKiller)
-        else player.joinTeam(teamAlive)
-    }
 
 
     @EventHandler
@@ -109,8 +100,7 @@ class Events : Listener {
 
     @EventHandler
     fun onCriterion(e: PlayerAdvancementCriterionGrantEvent) {
-        if (Game.playing && Game.getPlayer(e.player)?.alive == true) return
-        if (e.player.gameMode != GameMode.SPECTATOR) return
+        if (Game.playing && Game.getPlayer(e.player)?.alive == true && e.player.gameMode != GameMode.SPECTATOR) return
         e.isCancelled = true
     }
 

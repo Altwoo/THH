@@ -117,7 +117,6 @@ object Game {
         Bukkit.getWorlds().forEach {
             it.setGameRule(GameRules.IMMEDIATE_RESPAWN, true)
             it.setGameRule(GameRules.LOCATOR_BAR, false)
-            it.setGameRule(GameRules.SPECTATORS_GENERATE_CHUNKS, false)
             it.setGameRule(GameRules.RESPAWN_RADIUS, 0)
             it.setGameRule(GameRules.ADVANCE_TIME, false)
             it.setGameRule(GameRules.ADVANCE_WEATHER, false)

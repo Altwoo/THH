@@ -56,7 +56,7 @@ data class GamePlayer(
         val excluded = if (self == null || rankedList.take(n).any { it.first == this }
         ) listOf(" ") else listOf(
             "...",
-            "${self.second}. §6${if (alive) "" else "§m"}${self.first.name}§r: §a${self.first.score}${if (alive) " §2+3" else ""}",
+            "${self.second}. §6${if (alive) "" else "§m"}${self.first.name}§r: §a${self.first.score}${if (!died) " §2+3" else ""}",
             "  "
         )
 
