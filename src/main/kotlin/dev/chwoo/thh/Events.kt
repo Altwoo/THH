@@ -82,6 +82,15 @@ class Events : Listener {
         e.respawnLocation = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
+    @EventHandler
+    fun onPostRespawn(e: PlayerPostRespawnEvent) {
+        if (!Game.playing) return
+        if (e.respawnReason != PlayerRespawnEvent.RespawnReason.DEATH) return
+        val player = e.player
+        val banlist = Bukkit.getBanList(BanListType.PROFILE)
+        banlist.addBan(player.playerProfile, "사망했습니다!", Duration.ofMillis(BAN_DURATION.toLong()), null)
+        player.kick("사망했습니다!".comp(NamedTextColor.RED))
+    }
 
 
     @EventHandler
@@ -147,13 +156,6 @@ class Events : Listener {
 
 
         player.respawnLocation = null
-
-        delay {
-            val banlist = Bukkit.getBanList(BanListType.PROFILE)
-            banlist.addBan(player.playerProfile, "사망했습니다!", Duration.ofMillis(BAN_DURATION.toLong()), null)
-            player.kick("사망했습니다!".comp(NamedTextColor.RED))
-        }
-
 
         Bukkit.broadcast(
             comps(
